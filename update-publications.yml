@@ -1,0 +1,86 @@
+# .github/workflows/update-publications.yml
+#
+# GitHub Actions PRIMER:
+#
+# A "workflow" is an automated process defined in YAML that GitHub runs
+# on their servers in response to events (pushes, PRs, schedules).
+#
+# This workflow runs on a schedule (weekly), executes fetch_publications.py,
+# and if the output file changes, commits and pushes the update automatically.
+# The live website then reflects the new publications on next page load.
+#
+# YAML syntax: indentation defines structure (like Python).
+# key: value pairs. Lists use - prefix. Strings can be quoted or bare.
+
+name: Update Publications
+
+on:
+  # Cron syntax: "minute hour day month weekday"
+  # "0 6 * * 1" = 06:00 UTC every Monday
+  # Cron reference: https://crontab.guru/
+  schedule:
+    - cron: "0 6 * * 1"
+
+  # Also allow manually triggering from the GitHub Actions UI
+  workflow_dispatch:
+
+  # Run on every push to main (useful while setting up)
+  # Remove this after initial setup if you don't want it running on every commit
+  push:
+    branches: [main]
+    paths:
+      - "fetch_publications.py"   # only re-run if the script itself changes
+
+jobs:
+  update-publications:
+    # GitHub provides free Ubuntu runners for public repos
+    runs-on: ubuntu-latest
+
+    # Grant the job permission to write to the repository
+    # (needed to commit the generated publications.json)
+    permissions:
+      contents: write
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python (we specify the version explicitly for reproducibility)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"   # cache pip dependencies between runs for speed
+
+      # Step 3: Install Python dependencies
+      - name: Install dependencies
+        run: pip install scholarly
+
+      # Step 4: Run the fetch script
+      # Environment variables are injected from GitHub Secrets/Variables.
+      # NEVER hardcode API keys or IDs in your workflow file — use secrets.
+      #
+      # To add secrets: GitHub repo → Settings → Secrets and variables → Actions
+      - name: Fetch publications
+        env:
+          # Set GOOGLE_SCHOLAR_ID as an Actions Variable (not secret, it's public)
+          # Settings → Secrets and variables → Actions → Variables tab
+          GOOGLE_SCHOLAR_ID: ${{ vars.GOOGLE_SCHOLAR_ID }}
+          # Set SCRAPER_API_KEY as an Actions Secret (it's a credential)
+          # Settings → Secrets and variables → Actions → Secrets tab
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
+        run: python fetch_publications.py
+
+      # Step 5: Commit and push changes if the data file changed
+      # We use a well-known community action for this, which handles the
+      # git config, diff check, commit, and push in one step.
+      - name: Commit updated publications
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update publications data [skip ci]"
+          # [skip ci] in the commit message prevents this commit from
+          # triggering another workflow run — avoids infinite loops.
+          file_pattern: "data/publications.json"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

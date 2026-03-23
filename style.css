@@ -1,0 +1,653 @@
+/* ==========================================================================
+   CSS FUNDAMENTALS — READ THIS FIRST
+   
+   CSS uses a "cascade" (hence Cascading Style Sheets): when multiple rules
+   target the same element, specificity and order determine which wins.
+   Specificity hierarchy (low → high): element < class < id < inline style
+   
+   We organize this file in a predictable order:
+   1. Custom Properties (CSS Variables) — your design tokens
+   2. Reset / Base styles
+   3. Layout primitives (containers, grids)
+   4. Component styles (navbar, hero, cards, etc.)
+   5. Utilities
+   6. Responsive overrides (media queries)
+========================================================================== */
+
+
+/* ==========================================================================
+   1. CUSTOM PROPERTIES (CSS Variables)
+   
+   Defined on :root (the <html> element), accessible everywhere as var(--name).
+   This is equivalent to defining constants at the top of a Python script.
+   Changing one value here cascades through the entire stylesheet.
+========================================================================== */
+:root {
+  /* Color palette */
+  --color-bg:          #f8f7f4;   /* warm off-white background */
+  --color-bg-alt:      #f0ede6;   /* slightly darker section background */
+  --color-surface:     #ffffff;   /* card surfaces */
+  --color-border:      #e4dfd5;   /* subtle borders */
+  --color-text:        #1c1b1a;   /* primary text: near-black */
+  --color-text-muted:  #6b6560;   /* secondary text: warm gray */
+  --color-accent:      #b5451b;   /* terracotta red — your key brand color */
+  --color-accent-soft: #f2e8e3;   /* a tint of accent for backgrounds */
+
+  /* Typography */
+  --font-display: 'DM Serif Display', Georgia, serif;  /* headings */
+  --font-body:    'DM Sans', system-ui, sans-serif;     /* body text */
+
+  /* Spacing scale — consistent increments (like an 8px grid) */
+  --space-xs:   0.25rem;  /*  4px */
+  --space-sm:   0.5rem;   /*  8px */
+  --space-md:   1rem;     /* 16px */
+  --space-lg:   2rem;     /* 32px */
+  --space-xl:   4rem;     /* 64px */
+  --space-2xl:  8rem;     /* 128px */
+
+  /* Border radius */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  16px;
+  --radius-pill: 999px;  /* makes any element a "pill" shape */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+
+  /* Layout */
+  --max-width: 1100px;
+  --nav-height: 64px;
+
+  /* Transitions — reusable easing curves */
+  --transition-fast: 150ms ease;
+  --transition-med:  300ms ease;
+}
+
+
+/* ==========================================================================
+   2. RESET & BASE STYLES
+   
+   Browsers have built-in default stylesheets (user-agent stylesheets) that
+   add margins, padding, and font sizes to elements. A "reset" normalizes these
+   so we start from a predictable baseline.
+========================================================================== */
+
+/* The "box model" governs how element size is calculated.
+   By default (box-sizing: content-box), width/height refer to just the content —
+   padding and border are ADDED ON TOP. This is confusing.
+   
+   box-sizing: border-box means width/height INCLUDE padding and border.
+   This is far more intuitive — just like Python: what you specify is what you get.
+   The * selector applies this to every element. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* scroll-behavior: smooth makes anchor links (#about, #publications)
+     animate to their targets instead of jumping instantly */
+  scroll-behavior: smooth;
+  /* font-size on html sets the "rem" base. 1rem = 16px by default.
+     We keep it at 100% (16px) but this is where you'd set it to 62.5%
+     to make 1rem = 10px for easier mental math. */
+  font-size: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* line-height: unitless value is preferred — it scales with font-size.
+     1.6 means the line height is 160% of the current font size. */
+  line-height: 1.6;
+  /* font-feature-settings enables OpenType features in fonts.
+     "kern" = kerning (spacing between specific letter pairs),
+     "liga" = ligatures (combined glyphs like fi, fl) */
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;  /* makes fonts crisper on macOS/iOS */
+}
+
+/* Remove default list bullets/numbers — we'll style lists ourselves */
+ul, ol {
+  list-style: none;
+}
+
+/* Make images responsive by default.
+   max-width: 100% prevents images from overflowing their containers.
+   display: block removes the mysterious bottom gap images get as inline elements. */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Remove default link styling — we'll apply our own */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+/* ==========================================================================
+   3. LAYOUT PRIMITIVES
+========================================================================== */
+
+/* The "container" is a centered max-width wrapper with horizontal padding.
+   This is the most common layout pattern on the web. */
+.container {
+  max-width: var(--max-width);
+  margin-inline: auto;   /* shorthand for margin-left + margin-right: auto */
+  padding-inline: var(--space-lg);  /* horizontal padding on both sides */
+}
+
+/* A narrower variant for text-heavy sections like Contact */
+.container--narrow {
+  max-width: 680px;
+}
+
+/* Section base styles */
+.section {
+  padding-block: var(--space-2xl);  /* shorthand for padding-top + padding-bottom */
+}
+
+/* Alternating section backgrounds for visual rhythm */
+.section--alt {
+  background-color: var(--color-bg-alt);
+}
+
+/* Section titles follow a consistent typographic pattern */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  /* clamp(min, preferred, max) is a responsive sizing function.
+     The "preferred" value (4vw = 4% of viewport width) scales with screen size,
+     but is always clamped between the min and max values. */
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.section-subtitle {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  max-width: 60ch;  /* ch = width of the "0" character. 60–75ch is optimal line length */
+  margin-bottom: var(--space-xl);
+}
+
+
+/* ==========================================================================
+   4. COMPONENTS
+========================================================================== */
+
+/* --- NAVBAR ---------------------------------------------------------------
+   position: sticky keeps the nav in view as you scroll.
+   It behaves like position: relative until the element hits the top: 0
+   threshold, then it "sticks" there. z-index ensures it sits above page content. */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  background-color: rgba(248, 247, 244, 0.92);  /* semi-transparent background */
+  /* backdrop-filter: blur() creates a "frosted glass" effect — blurs content
+     behind the element. The rgba opacity above makes this visible. */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);  /* Safari prefix */
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-inner {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-lg);
+  height: 100%;
+  /* Flexbox: a 1D layout model. display: flex turns a container into a flex container.
+     Its direct children become "flex items" that arrange along the main axis.
+     justify-content controls alignment along the main axis (horizontal by default).
+     align-items controls alignment along the cross axis (vertical). */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--space-lg);  /* gap sets spacing between flex/grid items */
+}
+
+.nav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+  transition: color var(--transition-fast);
+  /* The transition property defines which CSS properties animate when they change.
+     Here, the color property will animate over 150ms when the element is hovered. */
+}
+
+.nav-links a:hover {
+  color: var(--color-accent);
+}
+
+
+/* --- HERO -----------------------------------------------------------------
+   min-height: 100svh makes the hero fill the viewport.
+   svh = "small viewport height" — on mobile, this excludes the browser chrome
+   (address bar, navigation). The older 100vh would include it, causing overflow. */
+.hero {
+  min-height: calc(100svh - var(--nav-height));
+  display: flex;
+  align-items: center;
+  padding-block: var(--space-xl);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hero-content {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-lg);
+  display: flex;
+  align-items: center;
+  /* gap between the text column and photo */
+  gap: var(--space-2xl);
+  /* flex-wrap: wrap allows the columns to stack on small screens */
+  flex-wrap: wrap;
+}
+
+.hero-text {
+  /* flex: 1 makes this element grow to fill available space.
+     The photo will stay at its natural size; text takes the rest. */
+  flex: 1;
+  min-width: 300px;  /* prevents it from getting too narrow before wrapping */
+}
+
+.hero-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-md);
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.hero-dept {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.hero-bio {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  max-width: 55ch;
+  margin-bottom: var(--space-xl);
+}
+
+/* "Pill" links — small rounded buttons for profile links */
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.pill-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4em 1em;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-border);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.pill-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Accent variant for the CV download button */
+.pill-link--accent {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.pill-link--accent:hover {
+  background-color: #9a3a17;
+  border-color: #9a3a17;
+  color: white;
+}
+
+/* --- PROFILE PHOTO -------------------------------------------------------- */
+.hero-photo-wrapper {
+  flex-shrink: 0;  /* prevents the photo from shrinking when space is tight */
+  position: relative;
+}
+
+.hero-photo {
+  width: 280px;
+  height: 280px;
+  /* object-fit: cover makes the image fill its container while maintaining
+     aspect ratio — it crops rather than distorts. Like CSS equivalent of
+     matplotlib's aspect='auto'. */
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  /* A decorative offset border using box-shadow.
+     Syntax: offset-x offset-y blur spread color */
+  box-shadow:
+    var(--shadow-md),
+    6px 6px 0px 0px var(--color-accent);
+}
+
+
+/* --- RESEARCH CARDS -------------------------------------------------------
+   CSS Grid: a 2D layout model. Perfect for card grids.
+   
+   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+   
+   This is the most powerful single line in responsive CSS:
+   - repeat(auto-fill, ...) — create as many columns as fit
+   - minmax(280px, 1fr) — each column is at least 280px, at most 1 equal fraction
+   Result: automatically responsive — no media queries needed for the grid itself. */
+.research-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+.research-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: transform var(--transition-med), box-shadow var(--transition-med);
+  /* By default, CSS transition animates existing properties. We add it here
+     so that on hover, the card lifts smoothly. */
+}
+
+.research-card:hover {
+  transform: translateY(-4px);  /* move 4px upward */
+  box-shadow: var(--shadow-md);
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.research-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: var(--space-sm);
+}
+
+.research-card p {
+  font-size: 0.925rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+
+/* --- PUBLICATION FILTER CONTROLS ----------------------------------------- */
+.pub-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.filter-btn {
+  /* Reset browser's default button styling */
+  appearance: none;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  border-radius: var(--radius-pill);
+  padding: 0.35em 1em;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+
+/* --- PUBLICATION CARDS ---------------------------------------------------- */
+#pub-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.pub-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: grid;
+  /* Two-column layout: a narrow label column and a wide content column */
+  grid-template-columns: 80px 1fr;
+  gap: var(--space-md);
+  align-items: start;
+  transition: box-shadow var(--transition-fast);
+}
+
+.pub-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.pub-year {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--color-accent);
+  padding-top: 2px;
+}
+
+.pub-body {}
+
+.pub-title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: var(--space-xs);
+}
+
+.pub-title a {
+  color: var(--color-text);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--transition-fast), color var(--transition-fast);
+}
+
+.pub-title a:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+
+.pub-venue {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-bottom: var(--space-xs);
+}
+
+.pub-authors {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Highlight the user's own name in author lists */
+.pub-authors .own-name {
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.pub-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.pub-tag {
+  font-size: 0.75rem;
+  padding: 0.2em 0.6em;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+
+/* --- LOADING / ERROR STATES ----------------------------------------------- */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding-block: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+/* CSS-only animated spinner using @keyframes.
+   @keyframes defines an animation — a sequence of CSS states the element
+   moves through over time. We name it "spin". */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  /* A partially transparent top border creates the "loading" arc effect */
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  /* animation: name duration timing-function iteration-count */
+  animation: spin 0.8s linear infinite;
+}
+
+.error-state {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+
+/* --- CONTACT --------------------------------------------------------------- */
+.contact-text {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.contact-item {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: baseline;
+}
+
+.contact-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  min-width: 60px;
+}
+
+.contact-value {
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+a.contact-value:hover {
+  color: var(--color-accent);
+}
+
+
+/* --- FOOTER --------------------------------------------------------------- */
+.footer {
+  padding-block: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE DESIGN with Media Queries
+   
+   @media rules apply styles only when a condition is true.
+   "max-width: 768px" targets screens smaller than 768px — i.e., phones/tablets.
+   768px is a conventional "breakpoint" (tablet/phone boundary).
+   
+   We design "desktop-first" here and override for smaller screens.
+   Many modern developers prefer "mobile-first" (min-width queries) — 
+   both are valid; just be consistent.
+========================================================================== */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;  /* Hide nav links on mobile; add a hamburger menu if desired */
+  }
+
+  .hero-content {
+    flex-direction: column;  /* Stack text and photo vertically */
+    align-items: flex-start;
+  }
+
+  .hero-photo {
+    width: 160px;
+    height: 160px;
+  }
+
+  .pub-card {
+    grid-template-columns: 1fr;  /* Stack year and content on mobile */
+  }
+
+  .pub-year {
+    font-size: 0.85rem;
+  }
+}

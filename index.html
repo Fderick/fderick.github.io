@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--
+  DOCTYPE tells the browser: "parse this as modern HTML5, not legacy HTML."
+  Without it, browsers enter "quirks mode" and render inconsistently.
+-->
+<html lang="en">
+
+<head>
+  <!-- The <head> contains metadata — things the browser needs but the user doesn't see directly -->
+  <meta charset="UTF-8">
+  <!-- UTF-8 encoding supports all unicode characters, essential for math symbols, accents, etc. -->
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- This is critical for mobile responsiveness. Without it, mobile browsers assume a
+       desktop-width layout and scale it down. "width=device-width" makes the CSS pixel
+       width match the device's actual screen width. -->
+
+  <title>Dr. Your Name — Researcher</title>
+
+  <!-- Google Fonts: we're loading two fonts over the network.
+       "DM Serif Display" — an elegant serif for headings, gives academic weight
+       "DM Sans" — a clean geometric sans-serif for body text, highly readable -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+  <!-- Link to our external CSS file. The browser fetches and applies this stylesheet. -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- The <body> is the entire visible document. Think of it as your main() function. -->
+
+  <!-- =====================================================================
+       NAVIGATION BAR
+       The <nav> semantic element tells screen readers and search engines
+       "this is navigation", improving accessibility and SEO.
+  ====================================================================== -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <span class="nav-name">Your Name</span>
+      <ul class="nav-links">
+        <!-- <a href="#id"> scrolls smoothly to the element with that id. 
+             This is called an "anchor link" or "fragment identifier". -->
+        <li><a href="#about">About</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#publications">Publications</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       HERO SECTION
+       The introductory full-viewport section. "Hero" is web design jargon
+       for the prominent top section of a page.
+  ====================================================================== -->
+  <section class="hero" id="about">
+    <div class="hero-content">
+      <div class="hero-text">
+        <p class="hero-eyebrow">PhD Candidate / Assistant Professor / etc.</p>
+        <!-- The <h1> is the most important heading on the page. There should only be one.
+             Think of headings as a document outline: h1 > h2 > h3. -->
+        <h1 class="hero-name">Your Full Name</h1>
+        <p class="hero-dept">Department of [Your Field] · University Name</p>
+        <p class="hero-bio">
+          One or two sentences describing your research focus. For example:
+          I develop computational methods for understanding [phenomenon] 
+          in [domain]. My work sits at the intersection of [area A] and [area B].
+        </p>
+        <!-- "Links bar" with external profile links -->
+        <div class="hero-links">
+          <!-- Replace the href values with your actual profile URLs.
+               target="_blank" opens in a new tab.
+               rel="noopener noreferrer" is a security best practice when using target="_blank"
+               — it prevents the opened page from accessing your window object. -->
+          <a href="https://orcid.org/0000-0000-0000-0000" target="_blank" rel="noopener noreferrer" class="pill-link">
+            ORCID
+          </a>
+          <a href="https://scholar.google.com/citations?user=YOURID" target="_blank" rel="noopener noreferrer" class="pill-link">
+            Google Scholar
+          </a>
+          <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" class="pill-link">
+            GitHub
+          </a>
+          <a href="cv.pdf" class="pill-link pill-link--accent">
+            Download CV
+          </a>
+        </div>
+      </div>
+      <!-- Replace with your own photo. The alt attribute is required for accessibility
+           and is shown if the image fails to load. -->
+      <div class="hero-photo-wrapper">
+        <img src="photo.jpg" alt="Portrait of Your Name" class="hero-photo">
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       RESEARCH INTERESTS
+  ====================================================================== -->
+  <section class="section" id="research">
+    <div class="container">
+      <h2 class="section-title">Research</h2>
+      <p class="section-subtitle">
+        Briefly describe your overarching research mission — one paragraph is enough.
+      </p>
+
+      <!-- A "grid" of research interest cards. The actual grid layout is defined in CSS. -->
+      <div class="research-grid">
+
+        <!-- Each card is a <article> — a semantically self-contained piece of content. -->
+        <article class="research-card">
+          <span class="card-icon">◈</span>
+          <h3>Research Area One</h3>
+          <p>A 2–3 sentence description of this focus area, key methods, and what problems it addresses.</p>
+        </article>
+
+        <article class="research-card">
+          <span class="card-icon">◈</span>
+          <h3>Research Area Two</h3>
+          <p>Describe the second major theme of your work. What datasets, models, or experiments are involved?</p>
+        </article>
+
+        <article class="research-card">
+          <span class="card-icon">◈</span>
+          <h3>Research Area Three</h3>
+          <p>A third interest area. You can add or remove cards as needed by copying/deleting &lt;article&gt; blocks.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       PUBLICATIONS — dynamically populated by script.js via ORCID API
+  ====================================================================== -->
+  <section class="section section--alt" id="publications">
+    <div class="container">
+      <h2 class="section-title">Publications</h2>
+      
+      <div class="pub-controls">
+        <!-- A filter bar so visitors can narrow down publication types -->
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="journal-article">Journal Articles</button>
+        <button class="filter-btn" data-filter="conference-paper">Conference Papers</button>
+        <button class="filter-btn" data-filter="preprint">Preprints</button>
+      </div>
+
+      <!-- This div is intentionally empty. JavaScript will inject publication cards here.
+           The id="pub-list" is how script.js targets this element — like a CSS selector
+           but for scripting. The "loading" state is shown until JS replaces it. -->
+      <div id="pub-list">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading publications from ORCID…</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       CONTACT
+  ====================================================================== -->
+  <section class="section" id="contact">
+    <div class="container container--narrow">
+      <h2 class="section-title">Contact</h2>
+      <p class="contact-text">
+        I am always open to discussing research collaborations, questions about my work, 
+        or potential PhD/postdoc opportunities.
+      </p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <span class="contact-label">Email</span>
+          <!-- Using a mailto: link opens the visitor's default email client -->
+          <a href="mailto:you@university.edu" class="contact-value">you@university.edu</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Office</span>
+          <span class="contact-value">Room 000, Building Name, University</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       FOOTER
+  ====================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="year"></span> Your Name · Built with HTML/CSS/JS · Hosted on GitHub Pages</p>
+      <!-- The <span id="year"> is replaced with the current year by script.js -->
+    </div>
+  </footer>
+
+  <!-- Scripts are placed at the BOTTOM of the body, not the head.
+       Why? The browser parses HTML top-to-bottom. If the script tag were in <head>,
+       it would run before the elements it references (like #pub-list) exist in the DOM.
+       Placing it here guarantees the DOM is fully built before the script runs.
+       (The modern alternative is using the "defer" attribute in <head>, which does the same.) -->
+  <script src="script.js"></script>
+
+</body>
+</html>
